@@ -19,15 +19,21 @@ def _check_pyscf(found_pyscf):
         raise ImportError("You must install `pyscf` to use this function")
 
 
-def makepyscf(atomcoords, atomnos, charge=0, mult=1):
+def makepyscf(data, charge=0, mult=1):
     """Create a Pyscf Molecule."""
     _check_pyscf(_found_pyscf)
-    mol = gto.Mole(
-        atom = [['{}'.format(atomnos[i]),atomcoords[i]] for i in range(len(atomcoords))],
-        unit="Angstrom",
-        charge=charge,
-        multiplicity=mult
-    )
+    # See what can be parsed:
+    inputattrs = data.__dict__
+
+    if hasattr(data, "atomcoords") and hasattr(data, "atomnos"):
+        mol = gto.Mole(
+            atom = [['{}'.format(data.atomnos[i]),atomcoords[i]] for i in range(len(atomcoords))],
+            unit="Angstrom",
+            charge=charge,
+            multiplicity=mult
+        )
+    # if hasattr(data, "mocoeffs"):
+    #     mol.mocoeff = data.
     return  mol
   
 del find_package

@@ -10,7 +10,7 @@ import unittest
 import numpy as np
 
 from cclib.bridge import cclib2pyscf
-
+import cclib
 
 class PyscfTest(unittest.TestCase):
     """Tests for the cclib2pyscf bridge in cclib."""
@@ -18,10 +18,10 @@ class PyscfTest(unittest.TestCase):
     def test_makepyscf(self):
         import pyscf
         from pyscf import scf
-
-        atomnos = np.array([1, 8, 1], "i")
-        atomcoords = np.array([[-1, 1, 0], [0, 0, 0], [1, 1, 0]], "f")
-        pyscfmol = cclib2pyscf.makepyscf(atomcoords, atomnos)
+        cclib.
+        data={'atomnos': np.array([1, 8, 1], "i"),
+        'atomcoords': np.array([[-1, 1, 0], [0, 0, 0], [1, 1, 0]], "f")}
+        pyscfmol = cclib2pyscf.makepyscf(data)
         pyscfmol.basis = "6-31G**"
         pyscfmol.cart = True
         pyscfmol.verbose = 0
