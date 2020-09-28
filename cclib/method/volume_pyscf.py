@@ -43,12 +43,9 @@ def electrondensity_spin(ccdata, volume, mocoeffslist):
     for mocoeffs in mocoeffslist:
         for mocoeff in mocoeffs: 
             #rewrite the wavefunction 
-            mo_a_on_grid = ao_on_grid.dot(ccdata.mocoeff[0,mocoeffslist])
-            mo_b_on_grid = ao_on_grid.dot(ccdata.mocoeff[1,mocoeffslists])
-            mo_on_grid = np.concatenate()
-            wavefn = numpy.zeros(density.data.shape, "d")
-            wavefn = 
-    density.data = 
+            mo_on_grid = ao_on_grid.dot(ccdata.mocoeff[0,mocoeffslist])
+            wavefn = mo_on_grid.T*mo_on_grid # probably not this easy....
+    density.data = wavefn**2
 ### pyscf: evaluate aos on a grid.
 ### pull out mo coeffs and dot to get ao on grid. 
 
