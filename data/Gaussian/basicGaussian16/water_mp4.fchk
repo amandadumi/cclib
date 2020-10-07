@@ -1,13 +1,13 @@
 Water                                                                   
-SP        RMP4SDTQ-FC                                                 STO-3G              
+SP        RCCSD-FC                                                    STO-3G              
 Number of atoms                            I                3
 Info1-9                                    I   N=           9
           12          12           0           0           0         110
-           1           4         601
+           1          14         301
 Full Title                                 C   N=           1
 Water       
 Route                                      C   N=           2
-#P MP4/STO-3G Pop=Full  
+#P CCSD/STO-3G          
 Charge                                     I                0
 Multiplicity                               I                1
 Number of electrons                        I               10
@@ -139,9 +139,9 @@ MP3 Energy                                 R     -7.501280093084969E+01
 MP4D Energy                                R     -7.501619360259385E+01
 MP4DQ Energy                               R     -7.501590114729224E+01
 MP4SDQ Energy                              R     -7.501601365577857E+01
-MP4 Energy                                 R     -7.501606805254291E+01
-Total Energy                               R     -7.501606805254291E+01
-Post-SCF wavefunction norm                 R      1.000000000000000E+00
+Cluster Energy                             R     -7.501768363910142E+01
+Total Energy                               R     -7.501768363910142E+01
+Post-SCF wavefunction norm                 R      1.015297679596432E+00
 RMS Density                                R      2.786553489831593E-10
 Job Status                                 I                1
 Nuclear derivative order                   I                0

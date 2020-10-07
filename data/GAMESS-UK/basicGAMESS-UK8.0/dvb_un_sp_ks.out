@@ -53,8 +53,8 @@
                                         Revision    6248      
                                         Compiled on 28-01-2012 17:52 by sismfg    
                                         job name   n/a     
-                                        date    Oct  7 2014
-                                        time       16:07:32
+                                        date    Oct  8 2014
+                                        time       20:58:51
                                         acct           1001
 
                                         job time specified      60000 minutes
@@ -1053,7 +1053,7 @@
 
  commence 2-electron integral evaluation at         0.00 seconds   0:00:00 wall
 
- end of 2-electron integral evaluation at           0.05 seconds   0:00:00 wall
+ end of 2-electron integral evaluation at           0.06 seconds   0:00:00 wall
 
  --------------------------------------------------------------------------------------------------------
 
@@ -1099,7 +1099,7 @@
           ---------------
 
           --------------
-          final energies   after  13 cycles at        11.38 seconds   0:00:11 wall
+          final energies   after  13 cycles at        11.41 seconds   0:00:11 wall
           --------------
 
 
@@ -2683,7 +2683,7 @@
    60  20 h s      -0.1515366291   0.1061984332   0.0531651765  -0.0713775280
 
 
- end of uhf-scf at        11.39 seconds   0:00:11 wall
+ end of uhf-scf at        11.41 seconds   0:00:11 wall
 
  --------------------------------------------------------------------------------------------------------
 
@@ -2695,7 +2695,7 @@
                                         wavefunction analysis
                                         *********************
 
- commence analysis at     11.39 seconds   0:00:11 wall
+ commence analysis at     11.41 seconds   0:00:11 wall
 
                  dipole moments
 
@@ -3136,7 +3136,7 @@
 
 
 
- end of wavefunction analysis at    11.39 seconds.   0:00:11 wall
+ end of wavefunction analysis at    11.42 seconds.   0:00:11 wall
 
  ================================================================================
 
@@ -3145,7 +3145,7 @@
  **********************************************************************
  **********************************************************************
  *                                                                    *
- *     job  option  complete at         11.39 seconds   0:00:11 wall  *
+ *     job  option  complete at         11.42 seconds   0:00:11 wall  *
  *                                                                    *
  **********************************************************************
  **********************************************************************
@@ -3153,7 +3153,7 @@
 
 
 
- end of  G A M E S S   program at        11.39 seconds   0:00:11 wall
+ end of  G A M E S S   program at        11.42 seconds   0:00:11 wall
 
 
 
@@ -3197,8 +3197,8 @@
  *summary of vector sections
  *
  *section    type      created:           title:
- *      2    uhf      16:07:32 on Oct  7  divinylbenzene unrestricted singlepoint
- *      3    uhf      16:07:32 on Oct  7  divinylbenzene unrestricted singlepoint
+ *      2    uhf      20:58:51 on Oct  8  divinylbenzene unrestricted singlepoint
+ *      3    uhf      20:58:51 on Oct  8  divinylbenzene unrestricted singlepoint
 
  file positions
  lfn   block  length
@@ -3214,13 +3214,13 @@
  task                         cpu (seconds)   percent  wall (seconds)   percent
  ******************************************************************************
  input                                 0.00      0.00            0.00      0.03
- vector generation                     0.00      0.00            0.01      0.05
- 2e-integral evaluation                0.05      0.44            0.06      0.52
- scf                                   0.12      1.05            0.14      1.27
- wave-function analysis                0.00      0.00            0.01      0.05
- ExCorr. energy                       11.22     98.51           11.23     98.07
+ vector generation                     0.00      0.00            0.00      0.04
+ 2e-integral evaluation                0.06      0.53            0.06      0.52
+ scf                                   0.12      1.05            0.15      1.27
+ wave-function analysis                0.01      0.09            0.01      0.06
+ ExCorr. energy                       11.23     98.34           11.24     98.06
  ******************************************************************************
- Total                                11.39                     11.45
+ Total                                11.42                     11.46
  ******************************************************************************
 
  Memory high water mark

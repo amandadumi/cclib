@@ -115,25 +115,34 @@ if _found_pyquante2:
                     bfs.append(basisfunction)
 
         return bfs
+    # Small wrapper PyQuante & pyquante2 function that evaluates basis function on a given point
+    # Used in both `wavefunction` and `electrondensity`
+    def pyamp(bfs, bs, x, y, z):
+        return bfs[bs](x, y, z)  # 1D numpy array with size 1 is returned from __call__ here.
 
-    def pyamp(bfs, bs, points):
-        """Wrapper for evaluating basis functions at one or more grid points.
 
-        Parameters
-        ----------
-        bfs : list
-            List of pyquante2 `cgbf`s (contracted Gaussian basis functions).
-        bs : int
-            Index into the list of CGBFs for the basis function to evaluate.
-        points : numpy.ndarray
-            An [n, 3] array of `n` Cartesian grid points on which to evaluate the basis function.
+_found_pyscf = find_package("pyscf")
+if _found_pyscf:
+    def getbfs(ccdata):
+        from cclib.bridge import cclib2pyscf
+        pymol = cclib2pyscf.makepyscf(ccdata)
+        bfs = []
+        for i, atom in enumerate(pymol):  # `atom` is instance of pyquante2.geo.atom.atom class.
+            basis = ccdata.gbasis[i]  # `basis` is basis coefficients stored in ccData.
+            for sym, primitives in basis:
+                for power in sym2powerlist[sym]:  # `sym` is S, P, D, F and is used as key here.
+                    exponentlist = []
+                    coefficientlist = []
 
-        Returns
-        -------
-        out : numpy.ndarray
-            An [n, ] array of the requested basis function's value on each grid point.
-        """
-        return bfs[bs].mesh(points)
+                    for exponents, coefficients in primitives:
+                        exponentlist.append(exponents)
+                        coefficientlist.append(coefficients)
+
+                    basisfunction = cgbf(
+                        atom.atuple()[1:4], powers=power, exps=exponentlist, coefs=coefficientlist,
+                    )
+                    basisfunction.normalize()
+                    bfs.append(basisfunction)
 
 
 _found_pyvtk = find_package("pyvtk")
@@ -153,6 +162,9 @@ def _check_pyvtk(found_pyvtk):
     if not found_pyvtk:
         raise ImportError("You must install `pyvtk` to use this function.")
 
+def _check_ysf(found_pyscf):
+    if not found_pyscf:
+        raise ImportError("You must install `pyscf` to use this function.")
 
 class Volume(object):
     """Represent a volume in space.
