@@ -23,8 +23,6 @@ if _found_pyscf:
     # mo_on_grid = mo_a_on_grid + mo_b_on_grid
     # return pygrid
 
-def ao_grid(ccdata,volume):
-
 def electrondensity(ccdata, vol, mocoeffslist):
     if len(mocoeffslist) == 2:
         return electrondensity_spin(ccdata, volume, [mocoeffslist[0]]) + electrondensity_spin(
@@ -40,9 +38,8 @@ def electrondensity_spin(ccdata, volume, mocoeffslist):
     ao_on_grid = pymol.eval_ao(eval_name=GOval_cart,vol)
     density = copy.copy(volume)
     density.data = numpy.zeros(density.data.shape, "d")
-    for mocoeffs in mocoeffslist:
-        for mocoeff in mocoeffs: 
-            #rewrite the wavefunction 
+    for mocoeffs in mocoeffslist: # are we looking at alpha or beta orbitals?
+        for mocoeff in mocoeffs: #for each mo in the alpha set & beta set maybe?
             mo_on_grid = ao_on_grid.dot(ccdata.mocoeff[0,mocoeffslist])
             wavefn = mo_on_grid.T*mo_on_grid # probably not this easy....
     density.data = wavefn**2
