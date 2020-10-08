@@ -318,7 +318,7 @@ def getGrid(vol):
     return (x, y, z)
 
 
-def wavefunction(ccdata, volume, mocoeffs):
+def wavefunction(ccdata, volume, mocoeffs, pymol=None):
     """Calculate the magnitude of the wavefunction at every point in a volume.
 
     Inputs:
@@ -335,22 +335,28 @@ def wavefunction(ccdata, volume, mocoeffs):
     wavefn = copy.copy(volume)
     wavefn.data = numpy.zeros(wavefn.data.shape, "d")
 
-    x, y, z = getGrid(wavefn)
-    gridpoints = numpy.asanyarray(
-        tuple((xp, yp, zp) for xp in x for yp in y for zp in z)
-    )
+    if pymol:
+    # pyscf 
+        ao = pymol.eval_gto('GTOval_sph', coords)
+        mo = ao.dot(mf.mo_coeff)
+    else:
+        x, y, z = getGrid(wavefn)
+        gridpoints = numpy.asanyarray(
+            tuple((xp, yp, zp) for xp in x for yp in y for zp in z)
+        )
 
-    # PyQuante & pyquante2
-    for bs in range(len(bfs)):
-        if abs(mocoeffs[bs]) > 0.0:
-            wavefn.data += numpy.resize(
-                pyamp(bfs, bs, gridpoints) * mocoeffs[bs], wavefn.data.shape
-            )
+        # PyQuante & pyquante2
+        for bs in range(len(bfs)):
+            if abs(mocoeffs[bs]) > 0.0:
+                wavefn.data += numpy.resize(
+                    pyamp(bfs, bs, gridpoints) * mocoeffs[bs], wavefn.data.shape
+                )
+        # pyscf 
 
     return wavefn
 
 
-def electrondensity_spin(ccdata, volume, mocoeffslist):
+def electrondensity_spin(ccdata, volume, mocoeffslist,_found_pyscf=False):
     """Calculate the magnitude of the electron density at every point in a volume for either up or down spin
 
     Inputs:
@@ -387,15 +393,22 @@ def electrondensity_spin(ccdata, volume, mocoeffslist):
     # For occupied orbitals
     # `mocoeff` and `gbasis` in ccdata object is ordered in a way `homos` can specify which orbital
     # is the highest lying occupied orbital in mocoeff and gbasis.
-    for mocoeffs in mocoeffslist:
-        for mocoeff in mocoeffs:
-            wavefn = numpy.zeros(density.data.shape, "d")
-            for bs in range(len(bfs)):
-                if abs(mocoeff[bs]) > 0.0:
-                    wavefn += numpy.resize(
-                        pyamp(bfs, bs, gridpoints) * mocoeff[bs], density.data.shape
-                    )
-            density.data += wavefn ** 2
+    if found_pyscf:
+    # pyscf 
+        ao = mol.eval_gto('GTOval_sph', coords)
+        mo = ao.dot(mf.mo_coeff)
+    else:   
+        for mocoeffs in mocoeffslist:
+            for mocoeff in mocoeffs:
+                wavefn = numpy.zeros(density.data.shape, "d")
+                for bs in range(len(bfs)):
+                    if abs(mocoeff[bs]) > 0.0:
+                        wavefn += numpy.resize(
+                            pyamp(bfs, bs, gridpoints) * mocoeff[bs], density.data.shape
+                        )
+                density.data += wavefn ** 2
+        
+
     return density
 
 
