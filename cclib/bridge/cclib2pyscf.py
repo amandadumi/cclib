@@ -15,7 +15,7 @@ l_sym2num = {"S": 0, "P": 1, "D": 2, "F": 3, "G": 4}
 
 _found_pyscf = find_package("pyscf")
 if _found_pyscf:
-    from pyscf import gto
+    from pyscf import gto, tools
 
 
 def _check_pyscf(found_pyscf):
