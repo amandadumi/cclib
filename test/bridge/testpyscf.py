@@ -8,12 +8,19 @@
 import unittest
 
 import numpy as np
-
+import sys
 from cclib.bridge import cclib2pyscf
 from cclib.parser.utils import find_package
 
 
 class PyscfTest(unittest.TestCase):
+    self.data, self.logfile = getdatafile(
+            "Gaussian", "basicGaussian16", ["dvb_un_sp.fchk"]
+        )
+    datadir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "data")
+        )
+
     """Tests for the cclib2pyscf bridge in cclib."""
 
     def setUp(self):
@@ -38,6 +45,16 @@ class PyscfTest(unittest.TestCase):
         ref = -75.824754602
         assert abs(en - ref) < 1.0e-6
 
+    def test_makepyscf_from_molden(self):
+        pyscfmol, pyscf_data = cclib2pyscf.makepyscf_from_molden(self.data)
+        assert np.allclose(pyscf_data['mo_energy'], self.data['mo_energy'])
+        # check first MO coefficient 
+        assert pyscfmol['mocoeffs'][0] == self.data['mo_energy'][0][0]
+        # check a random middle MO coefficient 
+        assert pyscfmol['mocoeffs'][10] == self.data['mo_energy'][0][10]  
+        # test behavior of parser if datatype isn't present.
+
 
 if __name__ == "__main__":
     unittest.main()
+    PyscfTest.test_makepyscf_from_molden()
