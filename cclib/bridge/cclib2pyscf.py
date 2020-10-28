@@ -33,7 +33,7 @@ def makepyscf(data, charge=0, mult=1):
         ],
         unit="Angstrom",
         charge=charge,
-        multiplicity=mult,
+        multiplicity=mult
     )
     inputattr = data.__dict__
     pt = PeriodicTable()
