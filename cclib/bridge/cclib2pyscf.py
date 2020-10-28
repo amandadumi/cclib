@@ -25,13 +25,10 @@ def makepyscf(atomcoords, atomnos, charge=0, mult=1):
     """Create a Pyscf Molecule."""
     _check_pyscf(_found_pyscf)
     mol = gto.Mole(
-        atom=[
-            ["{}".format(atomnos[i]), atomcoords[i]]
-            for i in range(len(atomcoords))
-        ],
+        atom=[["{}".format(atomnos[i]), atomcoords[i]] for i in range(len(atomcoords))],
         unit="Angstrom",
         charge=charge,
-        multiplicity=mult,
+        multiplicity=mult
     )
 
     return mol
