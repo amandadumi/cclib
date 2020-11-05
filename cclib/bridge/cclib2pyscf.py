@@ -17,17 +17,17 @@ if _found_pyscf:
 def _check_pyscf(found_pyscf):
     if not found_pyscf:
         raise ImportError("You must install `pyscf` to use this function")
+  
 
-
-def makepyscf(atomcoords, atomnos, charge=0, mult=1):
+def makepyscf(data, charge=0, mult=1):
     """Create a Pyscf Molecule."""
     _check_pyscf(_found_pyscf)
     mol = gto.Mole(
-        atom = [['{}'.format(atomnos[i]),atomcoords[i]] for i in range(len(atomcoords))],
+        atom = [['{}'.format(data.atomnos[i]),data.atomcoords[-1][i]] for i in range(data.natom)],
         unit="Angstrom",
         charge=charge,
         multiplicity=mult
     )
     return  mol
-  
+
 del find_package

@@ -6,11 +6,10 @@
 # the terms of the BSD 3-Clause License.
 
 import unittest
-
 import numpy as np
-
 from cclib.bridge import cclib2pyscf
-from cclib.parser.utils import find_package
+from cclib.parser.utils import find_package, convertor
+from ..test_data import getdatafile
 
 
 class PyscfTest(unittest.TestCase):
@@ -20,23 +19,20 @@ class PyscfTest(unittest.TestCase):
         super(PyscfTest, self).setUp()        
         if not find_package('pyscf'):
             raise ImportError('Must install pyscf to run this test')
-
+        self.data, self.logfile = getdatafile("GAMESS", "basicGAMESS-US2018", ["water_mp2.out"])
+    
     def test_makepyscf(self):
         import pyscf
         from pyscf import scf
-
-        atomnos = np.array([1, 8, 1], "i")
-        atomcoords = np.array([[-1, 1, 0], [0, 0, 0], [1, 1, 0]], "f")
-        pyscfmol = cclib2pyscf.makepyscf(atomcoords, atomnos)
-        pyscfmol.basis = "6-31G**"
+        refen = self.data.scfenergies[-1] # value in eVs
+        pyscfmol = cclib2pyscf.makepyscf(self.data)
+        pyscfmol.basis = "STO-3G"
         pyscfmol.cart = True
-        pyscfmol.verbose = 0
+        pyscfmol.verbose = 5
         pyscfmol.build()
-
         mhf = pyscfmol.HF(conv_tol=1e-6)
         en = mhf.kernel()
-        ref = -75.824754602
-        assert abs(en - ref) < 1.0e-6
+        assert abs(convertor(en,'hartree','eV')- refen) < 1.0e-6
 
 
 if __name__ == "__main__":
