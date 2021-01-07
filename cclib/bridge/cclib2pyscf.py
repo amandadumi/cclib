@@ -18,7 +18,7 @@ class MissingAttributeError(Exception):
 
 _found_pyscf = find_package("pyscf")
 if _found_pyscf:
-    from pyscf import gto, tools
+    from pyscf import gto, ao2mo
 
 
 def _check_pyscf(found_pyscf):
@@ -32,18 +32,21 @@ def makepyscf(data, charge=0, mult=1):
     # if hasattr(data, "gbasis"):
     #     basis = 
     inputattrs = data.__dict__
-    print(inputattrs['atomcoords'])
-    print([["{}".format(inputattrs['atomnos'][i]),inputattrs['atomcoords'][i]] for i in range(len(inputattrs['atomcoords']))])
+    required_attrs = {"atomcoords", "atomnos"}
+    missing = [x for x in required_attrs if not hasattr(data, x)]
+    if missing:
+        missing = " ".join(missing)
+        raise MissingAttributeError(
+            "Could not create pyscf molecule due to missing attribute: {}".format(missing)
+        )
     mol = gto.Mole(
-        atom=[
-            ["{}".format(data.atomnos[i]), data.atomcoords[-1][i]]
-            for i in range(data.natom)
+    atom=[
+        ["{}".format(data.atomnos[i]), data.atomcoords[-1][i]]
+        for i in range(data.natom)
         ],
-        atom=[["{}".format(inputattrs['atomnos'][i]),inputattrs['atomcoords'][i]] for i in range(len(inputattrs['atomcoords']))],
-        unit="Angstrom",
-        charge=charge,
-        # basis = basis,
-        multiplicity=mult  
+    unit="Angstrom",
+    charge=charge,
+    multiplicity=mult  
     )
     inputattr = data.__dict__
     pt = PeriodicTable()
@@ -66,71 +69,56 @@ def makepyscf(data, charge=0, mult=1):
         mol.basis = basis
     return mol
 
-
-
-def makepyscf_with_mo(data):
+def makepyscf_mos(ccdata,mol):
     """
-    Creates an molecule object and additional pyscf data formatted for PySCF.
-    Parameters:
+    Returns pyscf formatted MO properties from a cclib object.
+    Parameters
+    ---
+    ccdata: cclib object
+        cclib object from parsed output
+    mol: pyscf Molecule object
+       molecule object that must contain the mol.pasis property.
+    Returns
     ----
-    data: cclib data object from parsed output file
-
-    Returns:
-    ----
-    mol: a pyscf molecule object
-        a molecule object that consists of available data in Molden file.
-    pyscf_data: dictionary
-        a dictionary of additional values returned in an appropriate format for use in PySCF. 
-        If available in ccdata, the following objects are available in the dictionary, otherwise, values are None
+    mo_coeff : n_spin x nmo x nao ndarray
+        molecular coeffcients, unnormalized according to pyscf standards
+    mo_occ : array
+        molecular orbital occupation 
+    mo_syms : array
+       molecular orbital symmetry labels
+    mo_spin: array
+    mo_energies: array
+        molecular orbital energies
     """
-    _check_pyscf(_found_pyscf)
-    # temp = tempfile.NamedTemporaryFile(mode="w+t")
-    # Check required attributes.
-    required_attrs = {"atomcoords", "atomnos"}
-    missing = [x for x in required_attrs if not hasattr(data, x)]
-    if missing:
-        missing = " ".join(missing)
-        raise MissingAttributeError(
-            "Could not create pyscf molecule due to missing attribute: {}".format(missing)
-        )
-
-    pyscf_data = {}
-    # # taking advantage of pyscf molden parser as it accounts for basis normalization specifications.
-    # mldn_obj = ccwrite(data, outputtype="molden", returnstr=True)
-    # temp.write(mldn_obj)
-    # temp.seek(0)
-    # (
-    #     mol,
-    #     pyscf_data["mo_energy"],
-    #     pyscf_data["mo_coeff"],
-    #     pyscf_data["mo_occ"],
-    #     pyscf_data["irrep_labels"],
-    #     pyscf_data["spins"],
-    # ) = tools.molden.load(temp.name)
-
-    #mo energies
-    required_attrs = {"moenergies","mo_syms","mo_syms",""}
-    # pyscf needs 1-d array, thus flatten if data is of rank 2 array in case 
-    # of unrestricted.
-    pyscf_data['mo_energy'] = data['moenergies'].flatten()
-    # TODO: check on the form of symmetry labels in PySCF
-    pyscf_data['irrep_labels'] = data['mo_syms'].flatten()
-    #mo_occ
-    # cclib doesn't directorly store occupation, but can create
-    # ground state occupation from knowing whether it is restricted or not. 
-    pyscf_data['mo_occ'] = np.zeros_like(pyscf_data['mo_energy'])
-    if np.shape(data['homo'])[0] == 1:
-            pyscf_data['mo_occ'][:data['homos'][0]] = 1
-            pyscf_data['spins'][:data['homos'][0]] = 'Alpha'
-    elif np.shape(data['homo'])[0] == 2:
-            pyscf_data['mo_occ'][data['nmo']:data['nmo']+data['homos'][1]] = 1 
-            pyscf_data['spins'][data['nmo']:data['nmo']+data['homos'][1]] = 'Beta'
-
-    #mo_coeffs
-
-    temp.close()
-    return mol, pyscf_data
+    inputattrs = ccdata.__dict__
+    if "mocoeffs" in inputattrs:
+        # but the integrals are not yet loaded so this likely won't work? 
+        mol.build()
+        s = mol.intor('int1e_ovlp')
+        # this is done since pyscf mos are unnormalized.
+        if np.shape(ccdata.mocoeffs)[0] == 1:
+            mo_coeff = ccdata.mocoeffs[0].T
+            s = mol.intor('int1e_ovlp')
+            mo_coeff = np.einsum('i,ij->ij', np.sqrt(1/s.diagonal()), mo_coeff)
+            mo_occ = np.zeros(ccdata.nmo)
+            mo_occ[:ccdata.homos[0]] = 2
+            mo_syms = np.full_like(ccdata.moenergies, 'A', dtype=str)
+            mo_energies = ccdata.moenergies
+        elif np.shape(ccdata.mocoeffs)[0] == 2:
+            mo_coeff = ccdata.mocoeffs
+            s = mol.intor('int1e_ovlp')
+            #mo_coeff = np.einsum('i,ij->ij', np.sqrt(1/s.diagonal()), mo_coeff)
+            mo_occ = np.zeros((2,ccdata.nmo))
+            mo_occ[0,:ccdata.homos[0]] = 1
+            mo_occ[1,:ccdata.homos[1]] = 1
+            mo_syms = np.full_like(ccdata.moenergies, 'A', dtype=str)
+            mo_energies = ccdata.moenergies
 
 
->>>>>>> 4aa2d381 (intermediate progress)
+
+    return mo_coeff, mo_occ, mo_syms, mo_energies
+
+
+
+
 del find_package
