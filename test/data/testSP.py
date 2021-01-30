@@ -347,6 +347,25 @@ class GenericSPTest(unittest.TestCase):
             packaging.version.parse(self.data.metadata["package_version"]),
             packaging.version.Version
         )
+    
+    @skipForParser('ADF', 'reading input file contents and name is not implemented')
+    @skipForParser('DALTON', 'reading input file contents and name is not implemented')
+    @skipForParser('FChk', 'Formatted checkpoint files do not have an input file section')
+    @skipForParser('GAMESS', 'reading input file contents and name is not implemented')
+    @skipForParser('GAMESSUK', 'reading input file contents and name is not implemented')
+    @skipForParser('GAMESSUS', 'reading input file contents and name is not implemented')
+    @skipForParser('Gaussian', 'reading input file contents and name is not implemented')
+    @skipForParser('Jaguar', 'reading input file contents and name is not implemented')
+    @skipForParser('Molcas', 'reading input file contents and name is not implemented')
+    @skipForParser('Molpro', 'reading input file contents and name is not implemented')
+    @skipForParser('NWChem', 'reading input file contents and name is not implemented')
+    @skipForParser('Psi3', 'reading input file contents and name is not implemented')
+    @skipForParser('Psi4', 'reading input file contents and name is not implemented')
+    @skipForParser('Turbomole', 'reading input file contents and name is not implemented')
+    def testmetadata_times(self):
+        """Does metadata have expected keys and values?"""
+        self.assertIn("cpu_time", self.data.metadata)
+        self.assertIn("wall_time", self.data.metadata)
 
 
 class ADFSPTest(GenericSPTest):
