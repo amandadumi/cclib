@@ -25,6 +25,7 @@ class GenericTDTest(unittest.TestCase):
     number = 5
     expected_l_max = 41000
 
+    @skipForParser('CFOUR','The parser is still being developed so we skip this test')
     @skipForParser('Molcas','The parser is still being developed so we skip this test')
     @skipForLogfile('Turbomole/basicTurbomole7.4/CO_cc2_TD_trip', 'Oscillator strengths are not available for Turbomole triplets using ricc2 but are required for testenergies()')
     def testenergies(self):
@@ -37,6 +38,7 @@ class GenericTDTest(unittest.TestCase):
         idx_lambdamax = numpy.argmax(self.data.etoscs)
         self.assertAlmostEqual(self.data.etenergies[idx_lambdamax], self.expected_l_max, delta=5000)
 
+    @skipForParser('CFOUR','The parser is still being developed so we skip this test')
     @skipForParser('Molcas','The parser is still being developed so we skip this test')
     @skipForLogfile("Turbomole/basicTurbomole7.4/CO_cc2_TD_trip", "Oscillator strengths are not available for triplets with Turbomole's ricc2")
     def testoscs(self):
@@ -44,6 +46,7 @@ class GenericTDTest(unittest.TestCase):
         self.assertEqual(len(self.data.etoscs), self.number)
         self.assertAlmostEqual(max(self.data.etoscs), 0.67, delta=0.1)
 
+    @skipForParser('CFOUR','The parser is still being developed so we skip this test')
     @skipForParser('FChk','The parser is still being developed so we skip this test')
     @skipForParser('Molcas','The parser is still being developed so we skip this test')
     def testsecs(self):
@@ -53,6 +56,7 @@ class GenericTDTest(unittest.TestCase):
         sumofsec = sum([z*z for (x, y, z) in lowestEtrans])
         self.assertAlmostEqual(sumofsec, 1.0, delta=0.16)
 
+    @skipForParser('CFOUR','The parser is still being developed so we skip this test')
     @skipForParser('FChk', 'This is true for calculations without symmetry, but not with?')
     @skipForParser('DALTON', 'This is true for calculations without symmetry, but not with?')
     @skipForParser('Molcas','The parser is still being developed so we skip this test')
@@ -63,12 +67,19 @@ class GenericTDTest(unittest.TestCase):
         self.assertTrue(t[0][1][0] == self.data.homos[0] or
                         t[0][2][0] == self.data.homos[0] + 1, t[0])
 
+<<<<<<< HEAD
     @skipForParser('Molcas','The parser is still being developed so we skip this test')    
+=======
+    @skipForParser('CFOUR','The parser is still being developed so we skip this test')
+    @skipForParser('Molcas','The parser is still being developed so we skip this test')
+    @skipForParser('Turbomole','The parser is still being developed so we skip this test')
+>>>>>>> 37df1bc0 (starting tests, not working yet)
     def testsymsnumber(self):
         """Is the length of etsyms correct?"""
         self.assertEqual(len(self.data.etsyms), self.number)
 
     @skipForParser('ADF', 'etrotats are not yet implemented')
+    @skipForParser('CFOUR','The parser is still being developed so we skip this test')
     @skipForParser('DALTON', 'etrotats are not yet implemented')
     @skipForParser('FChk', 'etrotats are not yet implemented')
     @skipForParser('GAMESS', 'etrotats are not yet implemented')

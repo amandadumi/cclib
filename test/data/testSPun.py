@@ -48,6 +48,7 @@ class GenericSPunTest(unittest.TestCase):
             self.assertEqual(self.data.mocoeffs[1].shape,
                              (self.data.nmo, self.data.nbasis))
 
+    @skipForParser('CFOUR','The parser is still being developed so we skip this test')
     @skipForParser('Jaguar', 'Data file does not contain enough information')
     @skipForParser('DALTON', 'mocoeffs not implemented yet')
     def testfornsoormo(self):
@@ -82,6 +83,7 @@ class GenericSPunTest(unittest.TestCase):
         self.assertEqual(self.data.charge, 1)
         self.assertEqual(self.data.mult, 2)
 
+    @skipForParser('CFOUR','The parser is still being developed so we skip this test')
     def testhomos(self):
         """Are the homos correct?"""
         msg = f"{numpy.array_repr(self.data.homos)} != array([34,33],'i')"
@@ -94,6 +96,7 @@ class GenericSPunTest(unittest.TestCase):
             self.assertEqual(len(self.data.moenergies[0]), self.data.nmo)
             self.assertEqual(len(self.data.moenergies[1]), self.data.nmo)
 
+    @skipForParser('CFOUR','The parser is still being developed so we skip this test')
     @skipForParser('FChk', 'Fchk files do not have a section for symmetry')
     @skipForParser('Molcas','The parser is still being developed so we skip this test')
     @skipForParser('Molpro', '?')
@@ -107,6 +110,7 @@ class GenericSPunTest(unittest.TestCase):
 class GenericROSPTest(GenericSPunTest):
     """Customized restricted open-shell single point unittest"""
 
+    @skipForParser('CFOUR','The parser is still being developed so we skip this test')
     @skipForParser('DALTON', 'mocoeffs not implemented yet')
     @skipForParser('Molcas','The parser is still being developed so we skip this test')
     @skipForParser('Turbomole','The parser is still being developed so we skip this test')
@@ -117,6 +121,7 @@ class GenericROSPTest(GenericSPunTest):
         self.assertEqual(self.data.mocoeffs[0].shape,
                           (self.data.nmo, self.data.nbasis))
 
+    @skipForParser('CFOUR','The parser is still being developed so we skip this test')
     @skipForParser('Molcas','The parser is still being developed so we skip this test')
     @skipForParser('Turbomole','The parser is still being developed so we skip this test')
     def testhomos(self):
@@ -126,6 +131,7 @@ class GenericROSPTest(GenericSPunTest):
         msg = f"{numpy.array_repr(self.data.homos)} != array([34, 33], 'i')"
         numpy.testing.assert_array_equal(self.data.homos, numpy.array([34, 33], "i"), msg)
 
+    @skipForParser('CFOUR','The parser is still being developed so we skip this test')
     @skipForParser('QChem', 'prints 2 sets of different MO energies?')
     @skipForParser('Molcas','The parser is still being developed so we skip this test')
     @skipForParser('Turbomole','The parser is still being developed so we skip this test')
@@ -134,6 +140,7 @@ class GenericROSPTest(GenericSPunTest):
         self.assertEqual(len(self.data.moenergies), 1)
         self.assertEqual(len(self.data.moenergies[0]), self.data.nmo)
 
+    @skipForParser('CFOUR','The parser is still being developed so we skip this test')
     @skipForParser('Molcas','The parser is still being developed so we skip this test')
     @skipForParser('Turbomole','The parser is still being developed so we skip this test')
     def testmosyms(self):
@@ -178,7 +185,7 @@ class GaussianSPunTest(GenericSPunTest):
         """Does atomnos have the right dimension (20)?"""
         size = len(self.data.atomnos)
         self.assertEqual(size, 20)
-    
+
     def testatomcharges(self):
         """Are atomcharges (at least Mulliken) consistent with natom and sum to one?"""
         for type_ in set(['mulliken'] + list(self.data.atomcharges.keys())):
@@ -191,7 +198,7 @@ class GaussianSPunTest(GenericSPunTest):
         self.assertEqual(len(spins), self.data.natom)
         self.assertAlmostEqual(sum(spins), 1.0, delta=0.001)
 
-            
+
 class JaguarSPunTest(GenericSPunTest):
     """Customized unrestricted single point unittest"""
 
