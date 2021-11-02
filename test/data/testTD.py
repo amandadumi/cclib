@@ -67,13 +67,11 @@ class GenericTDTest(unittest.TestCase):
         self.assertTrue(t[0][1][0] == self.data.homos[0] or
                         t[0][2][0] == self.data.homos[0] + 1, t[0])
 
-<<<<<<< HEAD
     @skipForParser('Molcas','The parser is still being developed so we skip this test')    
-=======
     @skipForParser('CFOUR','The parser is still being developed so we skip this test')
     @skipForParser('Molcas','The parser is still being developed so we skip this test')
-    @skipForParser('Turbomole','The parser is still being developed so we skip this test')
->>>>>>> 37df1bc0 (starting tests, not working yet)
+    @skipForParser('CFOUR','The parser is still being developed so we skip this test')
+    @skipForParser('Molcas','The parser is still being developed so we skip this test')    
     def testsymsnumber(self):
         """Is the length of etsyms correct?"""
         self.assertEqual(len(self.data.etsyms), self.number)
