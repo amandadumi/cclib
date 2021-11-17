@@ -61,7 +61,7 @@ if _found_gau2grid:
             # loop over each function on an atom
             for bf in abasis:
                 # loop over all primitives
-                coeffs = [] 
+                coeffs = []
                 exps = []
                 for prims in bf[1:]:
                     for prim in prims:
@@ -73,11 +73,15 @@ if _found_gau2grid:
                          'coef':coeffs,
                          'am':_angmom_key[bf[0]]}
                         )
-        print(basis_collect)
         ret = gau2grid.collocation_basis(vol_grid,basis_collect)
-        print(ret['PHI'].shape)
-
-        return ret
+        print(len(ccdata.mocoeffs))
+        print(ccdata.mocoeffs[0].shape)
+        if len(ccdata.mocoeffs) == 1:
+            print('we are in restricted')
+            mo_grid = ccdata.mocoeffs @ ret['PHI']
+        else:
+            mo_grid = [ccdata.mocoeffs[0] @ ret['PHI'],ccdata.mocoeffs[1] @ ret['PHI']]
+        return mo_grid
 
 if _found_pyquante:
     from PyQuante.CGBF import CGBF
@@ -192,6 +196,10 @@ def _check_pyquante():
 def _check_pyvtk(found_pyvtk):
     if not found_pyvtk:
         raise ImportError("You must install `pyvtk` to use this function.")
+
+def _check_gau2grid(found_gau2grid):
+    if not found_gau2grid:
+        raise ImportError("You must install `gau2grid` to use this function.")
 
 
 class Volume(object):
@@ -352,23 +360,26 @@ def wavefunction(ccdata, volume, mocoeffs):
     Output:
         Volume object with wavefunction at each grid point stored in data attribute
     """
-    _check_pyquante()
-    bfs = getbfs(ccdata)
+    if _found_gau2grid:
 
-    wavefn = copy.copy(volume)
-    wavefn.data = numpy.zeros(wavefn.data.shape, "d")
+    else:
+        _check_pyquante()
+        bfs = getbfs(ccdata)
 
-    x, y, z = getGrid(wavefn)
-    gridpoints = numpy.asanyarray(
-        tuple((xp, yp, zp) for xp in x for yp in y for zp in z)
-    )
+        wavefn = copy.copy(volume)
+        wavefn.data = numpy.zeros(wavefn.data.shape, "d")
 
-    # PyQuante & pyquante2
-    for bs in range(len(bfs)):
-        if abs(mocoeffs[bs]) > 0.0:
-            wavefn.data += numpy.resize(
-                pyamp(bfs, bs, gridpoints) * mocoeffs[bs], wavefn.data.shape
-            )
+        x, y, z = getGrid(wavefn)
+        gridpoints = numpy.asanyarray(
+            tuple((xp, yp, zp) for xp in x for yp in y for zp in z)
+        )
+
+        # PyQuante & pyquante2
+        for bs in range(len(bfs)):
+            if abs(mocoeffs[bs]) > 0.0:
+                wavefn.data += numpy.resize(
+                    pyamp(bfs, bs, gridpoints) * mocoeffs[bs], wavefn.data.shape
+                )
 
     return wavefn
 
