@@ -58,6 +58,7 @@ if _found_gau2grid:
         for a_idx,abasis in enumerate(ccdata.gbasis):
             location = ccdata.atomcoords[a_idx][0]
             vol_grid = numpy.array(getGrid(vol))
+            print(vol_grid)
             # loop over each function on an atom
             for bf in abasis:
                 # loop over all primitives
@@ -361,7 +362,10 @@ def wavefunction(ccdata, volume, mocoeffs):
         Volume object with wavefunction at each grid point stored in data attribute
     """
     if _found_gau2grid:
-
+        _check_gau2grid()
+        wavefn = copy.copy(volume)
+        wavefn.data = numpy.zeros(wavefn.data.shape, "d")
+        x, y, z = getGrid(wavefn)
     else:
         _check_pyquante()
         bfs = getbfs(ccdata)
