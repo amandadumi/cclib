@@ -47,16 +47,19 @@ if _found_gau2grid:
         parameters
         ----
         ccdata: cclib object
+        vol: cclib Volume object
 
         Returns
         ----
-
+        mo_grid: (nmo x npts) array
+            value of the Mos on each grid point,
         """
         _angmom_key = {'S':0,'P':1,'D':2,'F':3}
         # loop over basis functions on each atom
         basis_collect = []
         for a_idx,abasis in enumerate(ccdata.gbasis):
-            location = ccdata.atomcoords[a_idx][0]
+            print(ccdata.atomcoords.shape)
+            location = ccdata.atomcoords[0][a_idx]
             vol_grid = numpy.array(getGrid(vol))
             print(vol_grid)
             # loop over each function on an atom
@@ -74,15 +77,9 @@ if _found_gau2grid:
                          'coef':coeffs,
                          'am':_angmom_key[bf[0]]}
                         )
-        ret = gau2grid.collocation_basis(vol_grid,basis_collect)
-        print(len(ccdata.mocoeffs))
-        print(ccdata.mocoeffs[0].shape)
-        if len(ccdata.mocoeffs) == 1:
-            print('we are in restricted')
-            mo_grid = ccdata.mocoeffs @ ret['PHI']
-        else:
-            mo_grid = [ccdata.mocoeffs[0] @ ret['PHI'],ccdata.mocoeffs[1] @ ret['PHI']]
-        return mo_grid
+        aos_on_grid= gau2grid.collocation_basis(vol_grid,basis_collect)['PHI']
+        return aos_on_grid
+
 
 if _found_pyquante:
     from PyQuante.CGBF import CGBF
@@ -362,16 +359,25 @@ def wavefunction(ccdata, volume, mocoeffs):
         Volume object with wavefunction at each grid point stored in data attribute
     """
     if _found_gau2grid:
-        _check_gau2grid()
         wavefn = copy.copy(volume)
         wavefn.data = numpy.zeros(wavefn.data.shape, "d")
-        x, y, z = getGrid(wavefn)
+        aos_on_grid = grid_basis(ccdata,volume)
+        print('shape check. mos are shape: {} while bf_on grid is shape {}'.format(mocoeffs[0].shape,len(aos_on_grid[0])))
+        if len(ccdata.mocoeffs) == 1:
+            mo_grid = ccdata.mocoeffs[0] @ aos_on_grid
+        else:
+            mo_grid = [ccdata.mocoeffs[0] @ aos_on_grid,ccdata.mocoeffs[1] @ aos_on_grid]
+        wavefn.data = numpy.sum(mo_grid,axis =0)
+        print('shape of final wfn data')
+        print(wavefn.data.shape)
+
     else:
         _check_pyquante()
         bfs = getbfs(ccdata)
 
         wavefn = copy.copy(volume)
         wavefn.data = numpy.zeros(wavefn.data.shape, "d")
+        print(wavefn.data.shape)
 
         x, y, z = getGrid(wavefn)
         gridpoints = numpy.asanyarray(
@@ -386,6 +392,7 @@ def wavefunction(ccdata, volume, mocoeffs):
                 )
 
     return wavefn
+
 
 
 def electrondensity_spin(ccdata, volume, mocoeffslist):
