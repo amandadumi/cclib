@@ -7,7 +7,7 @@
 
 """Parser for ORCA output files"""
 
-
+import datetime
 import re
 from itertools import zip_longest
 
@@ -223,19 +223,19 @@ class ORCA(logfileparser.Logfile):
                             coords.append(splitter(line))
             self.metadata['keywords'] = keywords
             self.metadata['coords'] = coords
-        # If the calculations is a unrelaxed parameter scan then immediately following the 
+        # If the calculations is a unrelaxed parameter scan then immediately following the
         # input file block is the following section:
-                
+
         # | 12> **                         ****END OF INPUT****
         # ================================================================================
-        # 
+        #
         #                        ******************************
         #                        * Parameter Scan Calculation *
         #                        ******************************
-        # 
+        #
         # Trajectory settings:
         #     -> SCF surface will be mapped
-        # 
+        #
         # There are 1 parameter(s) to be scanned
         #              R: range=   0.58220000 ..   5.08220000  steps=   46
         # There will be   46 energy evaluations
@@ -262,19 +262,19 @@ class ORCA(logfileparser.Logfile):
                 current_params.append(float(line.split(':')[-1].strip()))
             self.append_attribute('scanparm', tuple(current_params))
 
-        # If the calculations is a relaxed parameter scan then immediately following the 
+        # If the calculations is a relaxed parameter scan then immediately following the
         # input file block is the following section:
 
         #                        ******************************
         #                        *    Relaxed Surface Scan    *
         #                        ******************************
-        # 
+        #
         #         Dihedral (  9,   8,   3,   2):   range=   0.00000000 .. 360.00000000  steps =   12
-        # 
+        #
         # There is 1 parameter to be scanned.
         # There will be   12 constrained geometry optimizations.
-        # 
-        # 
+        #
+        #
         #          *************************************************************
         #          *               RELAXED SURFACE SCAN STEP   1               *
         #          *                                                           *
@@ -290,7 +290,7 @@ class ORCA(logfileparser.Logfile):
                 line = next(inputfile)
             line = next(inputfile)
             num_params = int(line.strip().split()[2])
-        
+
         if line[0:15] == "Number of atoms":
 
             natom = int(line.split()[-1])
@@ -544,7 +544,7 @@ Dispersion correction           -0.016199959
                 target = float(line.split()[-2])
                 self.geotargets_names.append(name)
                 self.geotargets.append(target)
-        
+
 
         # Moller-Plesset energies.
         #
@@ -598,8 +598,8 @@ Dispersion correction           -0.016199959
         # E(0)                                       ...  -1639.237853227
         # E(CORR)                                    ...     -0.360153516
         # E(TOT)                                     ...  -1639.598006742
-        # Singles Norm <S|S>**1/2                    ...      0.176406354  
-        # T1 diagnostic                              ...      0.039445660  
+        # Singles Norm <S|S>**1/2                    ...      0.176406354
+        # T1 diagnostic                              ...      0.039445660
         if line[:22] == 'COUPLED CLUSTER ENERGY':
             self.skip_lines(inputfile, ['d', 'b'])
             line = next(inputfile)
@@ -865,7 +865,7 @@ Dispersion correction           -0.016199959
         # ------------------
         # MOLECULAR ORBITALS
         # ------------------
-        #                       0         1         2         3         4         5   
+        #                       0         1         2         3         4         5
         #                  -19.28527 -19.26828 -19.26356 -19.25801 -19.25765 -19.21471
         #                    2.00000   2.00000   2.00000   2.00000   2.00000   2.00000
         #                   --------  --------  --------  --------  --------  --------
@@ -993,7 +993,7 @@ Dispersion correction           -0.016199959
           (1) The electronic state is orbitally nondegenerate
           ...
 
-        freq.      45.75  E(vib)   ...       0.53 
+        freq.      45.75  E(vib)   ...       0.53
         freq.      78.40  E(vib)   ...       0.49
         ...
 
@@ -1288,8 +1288,8 @@ States  Energy Wavelength    D2        m2        Q2         D2+m2+Q2       D2/TO
             # -------------------------------------------------------------------
             #                              CD SPECTRUM
             # -------------------------------------------------------------------
-            # State   Energy Wavelength       R         MX        MY        MZ   
-            #         (cm-1)   (nm)       (1e40*cgs)   (au)      (au)      (au)  
+            # State   Energy Wavelength       R         MX        MY        MZ
+            #         (cm-1)   (nm)       (1e40*cgs)   (au)      (au)      (au)
             # -------------------------------------------------------------------
             #    1   43167.6    231.7      0.00000   0.00000  -0.00000   0.00000
             # ...
@@ -1831,7 +1831,7 @@ States  Energy Wavelength    D2        m2        Q2         D2+m2+Q2       D2/TO
                     density[j][i:i + 6] = list(map(float, line.split()[1:]))
 
             line = utils.skip_until_no_match(inputfile, r'^\s*$|^-*$|^Trace.*$|^Extracting.*$')
-            
+
             # This is only printed for open-shells.
             # -------------------
             # SPIN-DENSITY MATRIX
@@ -1882,7 +1882,12 @@ States  Energy Wavelength    D2        m2        Q2         D2+m2+Q2       D2/TO
             core_energy = float(next(inputfile).split()[3])
 
         if line[:15] == 'TOTAL RUN TIME:':
+            # the line format is "TOTAL RUN TIME: 0 days 0 hours 0 minutes 9 seconds 615 msec"
             self.metadata['success'] = True
+            if not "wall_time" in self.metadata:
+                self.metadata['wall_time'] = []
+            split = line.split()
+            wall_td = datetime.timedelta(days = float(split[3]), hours = float(split[5]), minutes = float(split[7]), seconds = float(split[9]), milliseconds = float(split[11]))
 
     def parse_charge_section(self, line, inputfile, chargestype):
         """Parse a charge section, modifies class in place

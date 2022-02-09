@@ -370,7 +370,6 @@ class GenericSPTest(unittest.TestCase):
     @skipForParser('Molcas', ' reading cpu/wall time is not implemented for this parser') 
     @skipForParser('Molpro', 'reading cpu/wall time is not implemented for this parser') 
     @skipForParser('NWChem', 'reading cpu/wall time is not implemented for this parser') 
-    @skipForParser('ORCA', 'reading cpu not implemented for this parser, wall time not available') 
     @skipForParser('Psi3', 'reading cpu/wall time is not implemented for this parser') 
     @skipForParser('Psi4', 'reading cpu/wall time is not implemented for this parser') 
     @skipForParser('Turbomole', 'reading cpu/wall time is not implemented for this parser') 
