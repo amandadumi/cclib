@@ -192,16 +192,13 @@ class GenericSPTest(unittest.TestCase):
             self.assertIsInstance(self.data.moenergies, list)
             self.assertIsInstance(self.data.moenergies[0], numpy.ndarray)
 
-<<<<<<< HEAD
     @skipForLogfile('Gaussian/basicGaussian16/dvb_sp_no.out', 'no energies for natural orbitals')
     @skipForLogfile('Turbomole/basicTurbomole5.9/dvb_sp_symm', 'delta of 7.4, everything else ok')
     def testfirstmoenergy(self):
         """Is the lowest energy molecular orbital within the target?"""
         self.assertAlmostEqual(self.data.moenergies[0][0], self.b3lyp_moenergy, delta=self.b3lyp_moenergy_delta)
 
-=======
     @skipForParser('CFOUR','The parser is still being developed so we skip this test')
->>>>>>> 37df1bc0 (starting tests, not working yet)
     @skipForParser('DALTON', 'mocoeffs not implemented yet')
     @skipForLogfile('Jaguar/basicJaguar7', 'Data file does not contain enough information. Can we make a new one?')
     @skipForParser('Turbomole', 'Use of symmetry has reduced the number of mo coeffs')
