@@ -58,10 +58,10 @@ if _found_gau2grid:
         # loop over basis functions on each atom
         basis_collect = []
         for a_idx,abasis in enumerate(ccdata.gbasis):
-            print(ccdata.atomcoords.shape)
             location = ccdata.atomcoords[0][a_idx]
             vol_grid = numpy.array(getGrid(vol))
-            print(vol_grid)
+            print('shape of the volume grid is.')
+            print(vol_grid.shape)
             # loop over each function on an atom
             for bf in abasis:
                 # loop over all primitives
@@ -69,15 +69,15 @@ if _found_gau2grid:
                 exps = []
                 for prims in bf[1:]:
                     for prim in prims:
-                      coeffs.append(prim[1])
                       exps.append(prim[0])
+                      coeffs.append(prim[1])
                 basis_collect.append(
                        {'center':location,
                          'exp':exps,
                          'coef':coeffs,
                          'am':_angmom_key[bf[0]]}
                         )
-        aos_on_grid= gau2grid.collocation_basis(vol_grid,basis_collect)['PHI']
+        aos_on_grid= gau2grid.collocation_basis(vol_grid,basis_collect,spherical=False)['PHI']
         return aos_on_grid
 
 
@@ -362,12 +362,14 @@ def wavefunction(ccdata, volume, mocoeffs):
         wavefn = copy.copy(volume)
         wavefn.data = numpy.zeros(wavefn.data.shape, "d")
         aos_on_grid = grid_basis(ccdata,volume)
-        print('shape check. mos are shape: {} while bf_on grid is shape {}'.format(mocoeffs[0].shape,len(aos_on_grid[0])))
+        print('shape check. mos are shape: {} while bf_on grid is shape {}'.format(mocoeffs, aos_on_grid))
+        # check to see if restricted calculation
         if len(ccdata.mocoeffs) == 1:
-            mo_grid = ccdata.mocoeffs[0] @ aos_on_grid
+            mo_grid = mocoeffs @ aos_on_grid
+        # otherwise it is an unrestricted cacluation
         else:
-            mo_grid = [ccdata.mocoeffs[0] @ aos_on_grid,ccdata.mocoeffs[1] @ aos_on_grid]
-        wavefn.data = numpy.sum(mo_grid,axis =0)
+            mo_grid = [ccdata.mocoeffs @ aos_on_grid,ccdata.mocoeffs[1] @ aos_on_grid]
+        wavefn.data = numpy.sum(mo_grid, axis = 0)
         print('shape of final wfn data')
         print(wavefn.data.shape)
 
