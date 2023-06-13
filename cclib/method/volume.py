@@ -57,11 +57,9 @@ if _found_gau2grid:
         _angmom_key = {'S':0,'P':1,'D':2,'F':3}
         # loop over basis functions on each atom
         basis_collect = []
+        vol_grid = numpy.array(getGrid(vol))
         for a_idx,abasis in enumerate(ccdata.gbasis):
             location = ccdata.atomcoords[0][a_idx]
-            vol_grid = numpy.array(getGrid(vol))
-            print('shape of the volume grid is.')
-            print(vol_grid.shape)
             # loop over each function on an atom
             for bf in abasis:
                 # loop over all primitives
@@ -339,11 +337,11 @@ def getGrid(vol):
     Input:
        vol -- Volume object (will not be altered)
     """
-    conversion = convertor(1, "bohr", "Angstrom")
+    #conversion = convertor(1, "bohr", "Angstrom")
     gridendpt = vol.topcorner + 0.5 * vol.spacing
-    x = numpy.arange(vol.origin[0], gridendpt[0], vol.spacing[0]) / conversion
-    y = numpy.arange(vol.origin[1], gridendpt[1], vol.spacing[1]) / conversion
-    z = numpy.arange(vol.origin[2], gridendpt[2], vol.spacing[2]) / conversion
+    x = numpy.arange(vol.origin[0], gridendpt[0], vol.spacing[0]) 
+    y = numpy.arange(vol.origin[1], gridendpt[1], vol.spacing[1]) 
+    z = numpy.arange(vol.origin[2], gridendpt[2], vol.spacing[2])
     xv,yv,zv = numpy.meshgrid(x,y,z,indexing='ij')
     return numpy.array((xv.flatten(), yv.flatten(), zv.flatten()))
 
@@ -362,16 +360,27 @@ def wavefunction(ccdata, volume, mocoeffs):
         wavefn = copy.copy(volume)
         wavefn.data = numpy.zeros(wavefn.data.shape, "d")
         aos_on_grid = grid_basis(ccdata,volume)
-        print('shape check. mos are shape: {} while bf_on grid is shape {}'.format(mocoeffs, aos_on_grid))
+        print("aooverlaps are")
+        print(ccdata.aooverlaps)
+        print("mooverlaps are")
+        print(ccdata.mocoeffs[0]@ccdata.mocoeffs[0].T)
+        print("mooverlaps are")
+        print(ccdata.mocoeffs[0]@numpy.array(ccdata.aooverlaps)**(-0.5)@ccdata.mocoeffs[0])
         # check to see if restricted calculation
         if len(ccdata.mocoeffs) == 1:
-            mo_grid = mocoeffs @ aos_on_grid
+            # cclib is [MO,AO] indexing.
+            #mo_grid = numpy.dot(numpy.array(ccdata.mocoeffs[0]),(ccdata.aooverlaps)) #C.S.CT
+            #mo_grid = numpy.dot(mo_grid,numpy.array(ccdata.mocoeffs)[0].T) #C.S
+            #mo_grid = numpy.dot(mo_grid, aos_on_grid) #(MO).G_AO
+            mo_grid = numpy.dot(ccdata.mocoeffs[0], aos_on_grid) #(MO).G_AO
         # otherwise it is an unrestricted cacluation
         else:
-            mo_grid = [ccdata.mocoeffs @ aos_on_grid,ccdata.mocoeffs[1] @ aos_on_grid]
-        wavefn.data = numpy.sum(mo_grid, axis = 0)
-        print('shape of final wfn data')
+            mo_grid = [ccdata.mocoeffs @ aos_on_grid, ccdata.mocoeffs[1] @ aos_on_grid]
+        print(mo_grid.shape)
+        for i in range(mo_grid.shape[0]):
+            wavefn.data += numpy.resize(mo_grid[i],wavefn.data.shape) 
         print(wavefn.data.shape)
+        print(wavefn.data)
 
     else:
         _check_pyquante()
