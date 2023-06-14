@@ -10,7 +10,6 @@
 import copy
 
 import numpy
-
 from cclib.parser.utils import convertor
 from cclib.parser.utils import find_package
 
@@ -36,6 +35,7 @@ sym2powerlist = {
     ],
 }
 
+
 _found_gau2grid = find_package("gau2grid")
 _found_pyquante = find_package("PyQuante")
 
@@ -58,6 +58,7 @@ if _found_gau2grid:
         # loop over basis functions on each atom
         basis_collect = []
         vol_grid = numpy.array(getGrid(vol))
+
         for a_idx,abasis in enumerate(ccdata.gbasis):
             location = ccdata.atomcoords[0][a_idx]
             # loop over each function on an atom
@@ -76,6 +77,31 @@ if _found_gau2grid:
                          'am':_angmom_key[bf[0]]}
                         )
         aos_on_grid= gau2grid.collocation_basis(vol_grid,basis_collect,spherical=False)['PHI']
+        print('overlap initially for grid.')
+        grided_ovlp = aos_on_grid@aos_on_grid.T
+        print(grided_ovlp)
+        basis_collect = []
+        for a_idx,abasis in enumerate(ccdata.gbasis):
+            location = ccdata.atomcoords[0][a_idx]
+            # loop over each function on an atom
+            for bf in abasis:
+                # loop over all primitives
+                coeffs = []
+                exps = []
+                for prims in bf[1:]:
+                    for prim_idx,prim in enumerate(prims):
+                      exps.append(prim[0])
+                      coeffs.append(prim[1])
+                basis_collect.append(
+                       {'center':location,
+                         'exp':exps,
+                         'coef':coeffs/numpy.sqrt(grided_ovlp[prim_idx,prim_idx]),
+                         'am':_angmom_key[bf[0]]}
+                        ) 
+        aos_on_grid = gau2grid.collocation_basis(vol_grid,basis_collect,spherical=False)['PHI']
+        grided_ovlp = aos_on_grid@aos_on_grid.T
+        print('ao overlap on grid after')
+        print(grided_ovlp)
         return aos_on_grid
 
 
@@ -337,11 +363,11 @@ def getGrid(vol):
     Input:
        vol -- Volume object (will not be altered)
     """
-    #conversion = convertor(1, "bohr", "Angstrom")
+    conversion = convertor(1, "bohr", "Angstrom")
     gridendpt = vol.topcorner + 0.5 * vol.spacing
-    x = numpy.arange(vol.origin[0], gridendpt[0], vol.spacing[0]) 
-    y = numpy.arange(vol.origin[1], gridendpt[1], vol.spacing[1]) 
-    z = numpy.arange(vol.origin[2], gridendpt[2], vol.spacing[2])
+    x = numpy.arange(vol.origin[0], gridendpt[0], vol.spacing[0])#*conversion 
+    y = numpy.arange(vol.origin[1], gridendpt[1], vol.spacing[1])#*conversion
+    z = numpy.arange(vol.origin[2], gridendpt[2], vol.spacing[2])#*conversion
     xv,yv,zv = numpy.meshgrid(x,y,z,indexing='ij')
     return numpy.array((xv.flatten(), yv.flatten(), zv.flatten()))
 
@@ -359,29 +385,24 @@ def wavefunction(ccdata, volume, mocoeffs):
     if _found_gau2grid:
         wavefn = copy.copy(volume)
         wavefn.data = numpy.zeros(wavefn.data.shape, "d")
-        aos_on_grid = grid_basis(ccdata,volume)
-        print("aooverlaps are")
-        print(ccdata.aooverlaps)
-        print("mooverlaps are")
-        print(ccdata.mocoeffs[0]@ccdata.mocoeffs[0].T)
-        print("mooverlaps are")
-        print(ccdata.mocoeffs[0]@numpy.array(ccdata.aooverlaps)**(-0.5)@ccdata.mocoeffs[0])
+        aos_on_grid = grid_basis(ccdata, volume)
         # check to see if restricted calculation
         if len(ccdata.mocoeffs) == 1:
             # cclib is [MO,AO] indexing.
-            #mo_grid = numpy.dot(numpy.array(ccdata.mocoeffs[0]),(ccdata.aooverlaps)) #C.S.CT
-            #mo_grid = numpy.dot(mo_grid,numpy.array(ccdata.mocoeffs)[0].T) #C.S
-            #mo_grid = numpy.dot(mo_grid, aos_on_grid) #(MO).G_AO
             mo_grid = numpy.dot(ccdata.mocoeffs[0], aos_on_grid) #(MO).G_AO
         # otherwise it is an unrestricted cacluation
         else:
             mo_grid = [ccdata.mocoeffs @ aos_on_grid, ccdata.mocoeffs[1] @ aos_on_grid]
         print(mo_grid.shape)
-        for i in range(mo_grid.shape[0]):
-            wavefn.data += numpy.resize(mo_grid[i],wavefn.data.shape) 
         print(wavefn.data.shape)
-        print(wavefn.data)
-
+        gl_idx = 0
+        for orb in range(mo_grid.shape[0]):
+          gl_idx = 0
+          for x in range(wavefn.data.shape[0]):
+           for y in range(wavefn.data.shape[1]):
+              for z in range(wavefn.data.shape[2]):
+                wavefn.data[x][y][z] += mo_grid[orb,gl_idx]
+                gl_idx +=1
     else:
         _check_pyquante()
         bfs = getbfs(ccdata)
