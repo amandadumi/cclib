@@ -1,4 +1,5 @@
 from cclib.parser_properties import utils
+from cclib.parser_properties.aonames import aonames
 from cclib.parser_properties.atombasis import atombasis
 from cclib.parser_properties.atomcoords import atomcoords
 from cclib.parser_properties.atommasses import atommasses

@@ -17,6 +17,8 @@ class atomnos(base_parser):
         line = file_handler.last_line
         if line.strip() == "Standard orientation:":
             line = file_handler.skip_lines(["d", "Center", "Number", "d"], virtual=True)
+        
+            line = file_handler.virtual_next()
             constructed_data = []
             while list(set(line.strip())) != ["-"]:
                 broken = line.split()

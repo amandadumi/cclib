@@ -47,7 +47,7 @@ class mosyms(base_parser):
             while len(line) > 18 and line[17] == "(":
                 parts = line[17:].split()
                 for x in parts:
-                    constructed_data[0].append(mosyms.normalisesym(x.strip("()")))
+                    constructed_data[0].append(mosyms.gaussian_normalisesym(x.strip("()")))
                     i += 1
                 line = file_handler.virtual_next()
             if unres:
@@ -58,7 +58,7 @@ class mosyms(base_parser):
                 while len(line) > 18 and line[17] == "(":
                     parts = line[17:].split()
                     for x in parts:
-                        constructed_data[1].append(mosyms.normalisesym(x.strip("()")))
+                        constructed_data[1].append(mosyms.gaussian_normalisesym(x.strip("()")))
                         i += 1
                     line = file_handler.virtual_next()
             # Some calculations won't explicitly print the number of basis sets used,
